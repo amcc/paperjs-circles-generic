@@ -35,7 +35,7 @@
               id="divisions"
               type="range"
               min="4"
-              max="80"
+              max="100"
               step="1"
               value="30"
             />
@@ -50,7 +50,7 @@
               id="size-multiplier"
               type="range"
               min="0.05"
-              max="2"
+              max="5"
               step="0.01"
               value="0.8"
             />
@@ -89,10 +89,12 @@
               width="320"
               height="240"
             ></video>
+
+            <span id="fps">FPS: —</span>
             <canvas id="debug-canvas" width="320" height="240"></canvas>
           </div>
 
-          <button class="btn" id="btn-debug" onclick="toggleDebug()">
+          <button class="btn" id="btn-debug" onclick="togglePreview()">
             show source
           </button>
         </div>

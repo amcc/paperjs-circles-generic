@@ -6,23 +6,25 @@ let step = 1;
 let cols = 0;
 let rows = 0;
 let divisions = 30;
-let sizeMultiplier = 0.8;
+let sizeMultiplier = 1;
 let videoAspect = 4 / 3;
 let videoLabel = "";
 let sourceType = "camera";
 let cameraStream = null;
 let uploadObjectUrl = "";
 
-// Offscreen canvas for pixel sampling
-const off = Object.assign(document.createElement("canvas"), {
-  width: W,
-  height: H,
+// Low-res sampler canvas: one pixel per circle cell for fast brightness reads.
+const sampleOff = Object.assign(document.createElement("canvas"), {
+  width: 1,
+  height: 1,
 });
-const offCtx = off.getContext("2d", { willReadFrequently: true });
+const sampleCtx = sampleOff.getContext("2d", { willReadFrequently: true });
 
-// Debug canvas
-const debugCanvas = document.getElementById("debug-canvas");
-const debugCtx = debugCanvas.getContext("2d");
+// Preview canvas and elements
+const previewCanvas = document.getElementById("debug-canvas");
+const previewCtx = previewCanvas.getContext("2d");
+const previewWrap = document.getElementById("debug-wrap");
+const btnTogglePreview = document.getElementById("btn-debug");
 const mainCanvas = document.getElementById("c");
 const canvasWrap = document.getElementById("canvas-wrap");
 const status = document.getElementById("status");
@@ -87,40 +89,40 @@ window.addEventListener("resize", resizeScene);
 startCamera();
 
 // Animate
-let debugOn = true;
 let frameCount = 0;
+let lastFpsUpdate = 0;
+let lastFrameTime = performance.now();
+let previewVisible = true;
 
-setDebugState(debugOn);
+setPreviewVisibility(previewVisible);
 
 // Main frame loop: sample webcam pixels and map brightness to circle radii.
 paper.view.onFrame = () => {
   if (!isActiveSourceReady()) return;
 
-  offCtx.drawImage(activeSource.element, 0, 0, W, H);
-  if (debugOn) {
-    debugCtx.drawImage(off, 0, 0, debugCanvas.width, debugCanvas.height);
+  sampleCtx.drawImage(activeSource.element, 0, 0, cols, rows);
+
+  if (previewVisible) {
+    previewCtx.drawImage(
+      activeSource.element,
+      0,
+      0,
+      previewCanvas.width,
+      previewCanvas.height,
+    );
   }
 
-  const data = offCtx.getImageData(0, 0, W, H).data;
+  const data = sampleCtx.getImageData(0, 0, cols, rows).data;
   frameCount += 1;
+
+  updateFpsDisplay();
 
   let i = 0;
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
-      const sx = Math.min(W - 1, Math.floor(col * step + step / 2));
-      const sy = Math.min(H - 1, Math.floor(row * step + step / 2));
-      const px = (sx + sy * W) * 4;
+      const px = (col + row * cols) * 4;
       const grey = (data[px] + data[px + 1] + data[px + 2]) / 3;
-
-      if (debugOn && frameCount % 30 === 0 && row === 0 && col === 0) {
-        console.log({
-          grey,
-          rgb: [data[px], data[px + 1], data[px + 2]],
-          radius: circles[i].radius,
-        });
-      }
-
-      const nextRadius = ((255 - grey) / 255) * (step * sizeMultiplier);
+      const nextRadius = ((255 - grey) / 255) * ((step / 2) * sizeMultiplier);
       setCircleRadius(circles[i], nextRadius);
       i++;
     }
@@ -154,10 +156,9 @@ function rebuildCirclePath(circle) {
   circle.path = nextPath;
 }
 
-// Keep the offscreen sampler canvas in sync with scene dimensions.
-function resetOffscreenCanvas() {
-  off.width = W;
-  off.height = H;
+function resetSamplerCanvas() {
+  sampleOff.width = Math.max(1, cols);
+  sampleOff.height = Math.max(1, rows);
 }
 
 // Regenerate the circle grid from current dimensions and division settings.
@@ -179,6 +180,7 @@ function rebuildCircles() {
     }
   }
 
+  resetSamplerCanvas();
   updateStatus();
 }
 
@@ -204,7 +206,6 @@ function resizeScene() {
   mainCanvas.style.width = `${W}px`;
   mainCanvas.style.height = `${H}px`;
 
-  resetOffscreenCanvas();
   rebuildCircles();
 }
 
@@ -225,7 +226,7 @@ function startCamera() {
     .then((stream) => {
       cameraStream = stream;
       vid.srcObject = stream;
-      vid.play().catch(() => {});
+      setCameraActive(sourceType === "camera");
 
       const syncVideoAspect = () => {
         if (!vid.videoWidth || !vid.videoHeight) return;
@@ -263,6 +264,12 @@ function setActiveSource(nextType, element, label, aspectRatio) {
   sourceType = nextType;
   activeSource.element = element;
   videoLabel = label;
+
+  setCameraActive(nextType === "camera");
+
+  if (nextType !== "video") {
+    uploadVideo.pause();
+  }
 
   if (aspectRatio > 0) {
     videoAspect = aspectRatio;
@@ -357,13 +364,27 @@ function useCameraSource() {
 
   cleanupUploadMedia();
   mediaUploadInput.value = "";
-  vid.play().catch(() => {});
   setActiveSource(
     "camera",
     vid,
     `camera ${vid.videoWidth}x${vid.videoHeight}`,
     vid.videoWidth / vid.videoHeight,
   );
+}
+
+function setCameraActive(active) {
+  if (!cameraStream) return;
+
+  cameraStream.getVideoTracks().forEach((track) => {
+    track.enabled = active;
+  });
+
+  if (active) {
+    vid.play().catch(() => {});
+    return;
+  }
+
+  vid.pause();
 }
 
 function setVideoControlsVisibility(visible) {
@@ -417,23 +438,36 @@ function getUploadVideoFrameDuration() {
   return 1 / 30;
 }
 
+function updateFpsDisplay() {
+  const now = performance.now();
+  const deltaMs = now - lastFpsUpdate;
+
+  if (deltaMs < 500) return;
+
+  const framesSinceUpdate = frameCount - lastFrameTime;
+  const fps = Math.round((framesSinceUpdate * 1000) / deltaMs);
+
+  document.getElementById("fps").textContent = `${fps} FPS`;
+
+  lastFpsUpdate = now;
+  lastFrameTime = frameCount;
+}
+
 // Reflect slider state values in the sidebar labels.
 function syncControls() {
   divisionsValue.textContent = String(divisions);
   sizeMultiplierValue.textContent = sizeMultiplier.toFixed(2);
 }
 
-// Toggle visibility of the debug preview panel.
-function toggleDebug() {
-  debugOn = !debugOn;
-  setDebugState(debugOn);
+// Toggle visibility of the source preview panel.
+function togglePreview() {
+  previewVisible = !previewVisible;
+  setPreviewVisibility(previewVisible);
 }
 
-function setDebugState(isOn) {
-  document.getElementById("debug-wrap").classList.toggle("visible", isOn);
-  document.getElementById("btn-debug").textContent = isOn
-    ? "hide source"
-    : "show source";
+function setPreviewVisibility(visible) {
+  previewWrap.classList.toggle("visible", visible);
+  btnTogglePreview.textContent = visible ? "hide source" : "show source";
 }
 
 // Export normalized SVG (paths rebuilt from stored geometry).
