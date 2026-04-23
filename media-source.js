@@ -17,6 +17,8 @@ export function createMediaSourceController({
     playsInline: true,
   });
   const uploadImage = new Image();
+  const svgBitmapCanvas = document.createElement("canvas");
+  const svgBitmapCtx = svgBitmapCanvas.getContext("2d");
 
   function notifySourceChange(type, element, label, aspectRatio) {
     sourceType = type;
@@ -42,6 +44,31 @@ export function createMediaSourceController({
     cameraVideoEl.pause();
   }
 
+  function getCameraAspectRatio() {
+    const track = cameraStream?.getVideoTracks?.()[0];
+    const settings = track?.getSettings?.();
+
+    if (settings && Number.isFinite(settings.aspectRatio) && settings.aspectRatio > 0) {
+      return settings.aspectRatio;
+    }
+
+    if (
+      settings &&
+      Number.isFinite(settings.width) &&
+      Number.isFinite(settings.height) &&
+      settings.width > 0 &&
+      settings.height > 0
+    ) {
+      return settings.width / settings.height;
+    }
+
+    if (cameraVideoEl.videoWidth > 0 && cameraVideoEl.videoHeight > 0) {
+      return cameraVideoEl.videoWidth / cameraVideoEl.videoHeight;
+    }
+
+    return 4 / 3;
+  }
+
   function startCamera() {
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "user" }, audio: false })
@@ -58,13 +85,18 @@ export function createMediaSourceController({
             "camera",
             cameraVideoEl,
             `camera ${cameraVideoEl.videoWidth}x${cameraVideoEl.videoHeight}`,
-            cameraVideoEl.videoWidth / cameraVideoEl.videoHeight,
+            getCameraAspectRatio(),
           );
         };
 
         cameraVideoEl.onloadedmetadata = () => {
           cameraVideoEl.play().catch(() => {});
-          notifySourceChange("camera", cameraVideoEl, "camera", 4 / 3);
+          notifySourceChange(
+            "camera",
+            cameraVideoEl,
+            "camera",
+            getCameraAspectRatio(),
+          );
           requestAnimationFrame(syncCameraSource);
           requestAnimationFrame(syncCameraSource);
         };
@@ -114,7 +146,7 @@ export function createMediaSourceController({
       "camera",
       cameraVideoEl,
       `camera ${width}x${height}`,
-      width / height,
+      getCameraAspectRatio(),
     );
   }
 
@@ -125,6 +157,11 @@ export function createMediaSourceController({
     cleanupUploadMedia();
     uploadObjectUrl = URL.createObjectURL(file);
     setCameraActive(false);
+
+    if (isSvgFile(file)) {
+      loadSvgAsBitmap();
+      return;
+    }
 
     if (file.type.startsWith("image/")) {
       uploadImage.onload = () => {
@@ -172,8 +209,48 @@ export function createMediaSourceController({
     );
   }
 
+  function isSvgFile(file) {
+    return (
+      file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg")
+    );
+  }
+
+  function loadSvgAsBitmap() {
+    const svgImage = new Image();
+
+    svgImage.onload = () => {
+      const width = Math.max(1, Math.round(svgImage.naturalWidth || 1024));
+      const height = Math.max(1, Math.round(svgImage.naturalHeight || 1024));
+
+      svgBitmapCanvas.width = width;
+      svgBitmapCanvas.height = height;
+      svgBitmapCtx.clearRect(0, 0, width, height);
+      svgBitmapCtx.drawImage(svgImage, 0, 0, width, height);
+
+      URL.revokeObjectURL(uploadObjectUrl);
+      uploadObjectUrl = "";
+
+      notifySourceChange(
+        "image",
+        svgBitmapCanvas,
+        `svg ${width}x${height} (bitmap)`,
+        width / height,
+      );
+    };
+
+    svgImage.onerror = () => {
+      notifySourceChange("image", uploadImage, "failed to load svg", 4 / 3);
+    };
+
+    svgImage.src = uploadObjectUrl;
+  }
+
   function isActiveSourceReady() {
     if (sourceType === "image") {
+      if (activeSourceElement instanceof HTMLCanvasElement) {
+        return activeSourceElement.width > 0 && activeSourceElement.height > 0;
+      }
+
       return uploadImage.complete && uploadImage.naturalWidth > 0;
     }
 

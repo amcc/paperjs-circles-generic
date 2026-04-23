@@ -89,8 +89,14 @@ textarea {
 
 #actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+#actions .btn {
+  flex: 1;
+  min-width: 120px;
 }
 
 .control {
@@ -109,19 +115,28 @@ textarea {
 #circle-color-controls {
   border: 1px solid #d8d8d8;
   border-radius: 10px;
-  padding: 8px;
-  gap: 6px;
+  padding: 6px;
+  gap: 4px;
 }
 
 #circle-color-controls .control {
-  gap: 4px;
+  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#circle-color-controls .control > span {
+  width: 44px;
+  text-transform: lowercase;
 }
 
 .color-channel-inputs {
   display: grid;
   grid-template-columns: 1fr 58px;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
+  flex: 1;
 }
 
 .color-channel-inputs input[type="number"] {
@@ -264,10 +279,13 @@ textarea {
 }
 
 #debug-canvas {
-  width: 100%;
+  width: auto;
   height: auto;
+  max-width: 100%;
+  max-height: 240px;
   border: 1px solid #111;
   display: block;
+  align-self: center;
   visibility: visible;
 }
 
@@ -327,12 +345,14 @@ textarea {
 
 .video-controls {
   display: none;
-  grid-template-columns: 1fr;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
 .video-controls.visible {
-  display: grid;
+  display: flex;
 }
 
 #btn-export-raw {

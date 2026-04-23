@@ -19,6 +19,7 @@ export function createCircleRenderer({
   let sizeMultiplier = initialSizeMultiplier;
   let aspectRatio = initialAspectRatio;
   let sourceLabel = "";
+  let backgroundRect = null;
   let circleColor = {
     r: Number(initialColor.r ?? 0),
     g: Number(initialColor.g ?? 0),
@@ -59,6 +60,19 @@ export function createCircleRenderer({
   function resetSamplerCanvas() {
     sampleOff.width = Math.max(1, cols);
     sampleOff.height = Math.max(1, rows);
+  }
+
+  function syncBackground() {
+    if (backgroundRect) {
+      backgroundRect.remove();
+    }
+
+    backgroundRect = new paper.Path.Rectangle({
+      from: [0, 0],
+      to: [W, H],
+      fillColor: new paper.Color(1, 1, 1),
+    });
+    backgroundRect.sendToBack();
   }
 
   function updateStatus() {
@@ -111,6 +125,7 @@ export function createCircleRenderer({
     mainCanvas.style.width = `${W}px`;
     mainCanvas.style.height = `${H}px`;
 
+    syncBackground();
     rebuildCircles();
   }
 

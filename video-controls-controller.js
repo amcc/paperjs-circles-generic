@@ -13,6 +13,10 @@ export function createVideoControlsController({
 
   function setPlayPauseLabel(isPlaying) {
     playPauseButton.textContent = isPlaying ? "pause" : "play";
+    playPauseButton.setAttribute(
+      "aria-label",
+      isPlaying ? "pause video" : "play video",
+    );
   }
 
   function togglePlayback() {

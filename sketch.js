@@ -5,6 +5,7 @@ import { createPreviewController } from "./preview-controller.js";
 import { createVideoControlsController } from "./video-controls-controller.js";
 import { createFpsController } from "./fps-controller.js";
 import { createExportController } from "./export-controller.js";
+import { createRecordingController } from "./recording-controller.js";
 
 const dom = getDomElements();
 
@@ -49,8 +50,6 @@ function syncControls() {
   const r = Number(dom.circleColorRInput.value);
   const g = Number(dom.circleColorGInput.value);
   const b = Number(dom.circleColorBInput.value);
-  dom.circleColorValue.textContent = `rgb(${r}, ${g}, ${b})`;
-  dom.circleColorSwatch.style.background = `rgb(${r}, ${g}, ${b})`;
 }
 
 function syncCircleColor() {
@@ -133,6 +132,7 @@ const exportController = createExportController({
     dom.btnVideoForward,
     dom.btnExportFast,
     dom.btnExportRebuilt,
+    dom.btnRecordToggle,
     dom.btnTogglePreview,
   ],
   onExport: ({ filename, rebuildPaths, onProgress }) =>
@@ -146,6 +146,18 @@ const exportController = createExportController({
     if (isExporting) {
       fps.setExporting();
     }
+  },
+});
+
+const recordingController = createRecordingController({
+  canvas: dom.mainCanvas,
+  toggleButton: dom.btnRecordToggle,
+  onStatus: (message) => {
+    dom.statusEl.textContent = message;
+  },
+  onRecordingStateChange: (isRecording) => {
+    dom.btnExportFast.disabled = isRecording;
+    dom.btnExportRebuilt.disabled = isRecording;
   },
 });
 
@@ -195,6 +207,7 @@ dom.btnExportRebuilt.addEventListener("click", () => {
 window.addEventListener("resize", () => circleRenderer.resizeScene());
 
 videoControls.bind();
+recordingController.bind();
 preview.setVisible(true);
 preview.resizeByAspect(4 / 3);
 syncControls();

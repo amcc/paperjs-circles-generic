@@ -57,13 +57,8 @@
           </label>
 
           <div class="control" id="circle-color-controls">
-            <span>
-              circle color:
-              <strong id="circle-color-value">rgb(0, 0, 255)</strong>
-            </span>
-
             <label class="control" for="circle-color-r">
-              <span>R</span>
+              <span>red</span>
               <div class="color-channel-inputs">
                 <input
                   id="circle-color-r"
@@ -85,7 +80,7 @@
             </label>
 
             <label class="control" for="circle-color-g">
-              <span>G</span>
+              <span>green</span>
               <div class="color-channel-inputs">
                 <input
                   id="circle-color-g"
@@ -107,7 +102,7 @@
             </label>
 
             <label class="control" for="circle-color-b">
-              <span>B</span>
+              <span>blue</span>
               <div class="color-channel-inputs">
                 <input
                   id="circle-color-b"
@@ -127,8 +122,6 @@
                 />
               </div>
             </label>
-
-            <span id="circle-color-swatch" aria-hidden="true"></span>
           </div>
 
           <label class="control" for="media-upload">
@@ -139,9 +132,27 @@
           <button class="btn" id="btn-source-camera">use camera source</button>
 
           <div id="video-controls" class="video-controls" aria-hidden="true">
-            <button class="btn" id="btn-video-playpause">play</button>
-            <button class="btn" id="btn-video-back">frame back</button>
-            <button class="btn" id="btn-video-forward">frame forward</button>
+            <button
+              class="btn"
+              id="btn-video-playpause"
+              aria-label="play or pause"
+            >
+              play
+            </button>
+            <button
+              class="btn"
+              id="btn-video-back"
+              aria-label="step one frame back"
+            >
+              back
+            </button>
+            <button
+              class="btn"
+              id="btn-video-forward"
+              aria-label="step one frame forward"
+            >
+              forward
+            </button>
           </div>
 
           <div id="actions">
@@ -149,6 +160,7 @@
             <button class="btn" id="btn-export-raw">
               export svg (rebuilt)
             </button>
+            <button class="btn" id="btn-record-toggle">start recording</button>
           </div>
         </div>
 

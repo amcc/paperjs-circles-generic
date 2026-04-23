@@ -27,8 +27,6 @@ export function getDomElements() {
     circleColorRNumberInput: requireElement("circle-color-r-number"),
     circleColorGNumberInput: requireElement("circle-color-g-number"),
     circleColorBNumberInput: requireElement("circle-color-b-number"),
-    circleColorValue: requireElement("circle-color-value"),
-    circleColorSwatch: requireElement("circle-color-swatch"),
 
     cameraVideoEl: requireElement("vid"),
     uploadInputEl: requireElement("media-upload"),
@@ -41,6 +39,7 @@ export function getDomElements() {
 
     btnExportFast: requireElement("btn-export"),
     btnExportRebuilt: requireElement("btn-export-raw"),
+    btnRecordToggle: requireElement("btn-record-toggle"),
 
     exportOverlay: requireElement("export-overlay"),
     exportOverlayTitle: requireElement("export-overlay-title"),
