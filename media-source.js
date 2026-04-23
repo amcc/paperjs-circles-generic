@@ -48,7 +48,11 @@ export function createMediaSourceController({
     const track = cameraStream?.getVideoTracks?.()[0];
     const settings = track?.getSettings?.();
 
-    if (settings && Number.isFinite(settings.aspectRatio) && settings.aspectRatio > 0) {
+    if (
+      settings &&
+      Number.isFinite(settings.aspectRatio) &&
+      settings.aspectRatio > 0
+    ) {
       return settings.aspectRatio;
     }
 
