@@ -20,7 +20,14 @@ body {
 }
 
 button,
-  display: none;
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+#app {
+  display: flex;
   height: 100dvh;
 }
 
@@ -31,9 +38,6 @@ button,
   color: #222;
   padding: 16px 14px;
   display: flex;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
   flex-direction: column;
   justify-content: space-between;
   flex-shrink: 0;
@@ -380,5 +384,13 @@ button,
     border-right: 0;
     border-bottom: 1px solid #d8d8d8;
     min-height: auto;
+  }
+
+  #sidebar-bottom {
+    order: 1;
+  }
+
+  #sidebar-top {
+    order: 2;
   }
 }
