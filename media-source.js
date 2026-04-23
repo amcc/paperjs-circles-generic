@@ -162,7 +162,12 @@ export function createMediaSourceController({
       syncCameraSource();
     });
 
-    notifySourceChange("camera", cameraVideoEl, "camera", getCameraAspectRatio());
+    notifySourceChange(
+      "camera",
+      cameraVideoEl,
+      "camera",
+      getCameraAspectRatio(),
+    );
   }
 
   function handleMediaUpload(event) {
