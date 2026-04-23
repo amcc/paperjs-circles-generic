@@ -106,6 +106,42 @@ textarea {
   width: 100%;
 }
 
+#circle-color-controls {
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  padding: 8px;
+  gap: 6px;
+}
+
+#circle-color-controls .control {
+  gap: 4px;
+}
+
+.color-channel-inputs {
+  display: grid;
+  grid-template-columns: 1fr 58px;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-channel-inputs input[type="number"] {
+  width: 58px;
+  padding: 3px 5px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #222;
+  background: #fff;
+}
+
+#circle-color-swatch {
+  width: 100%;
+  height: 16px;
+  border-radius: 6px;
+  border: 1px solid #111;
+  background: rgb(0, 0, 255);
+}
+
 #canvas-wrap {
   flex: 1;
   position: relative;
@@ -119,6 +155,86 @@ textarea {
   display: block;
   max-width: 100%;
   max-height: 100%;
+}
+
+#export-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 245, 245, 0.84);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+#export-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#export-overlay-card {
+  background: #fff;
+  border: 1px solid #111;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #111;
+  min-width: 220px;
+}
+
+#export-overlay-title {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#export-overlay-subtitle {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: #444;
+}
+
+#export-progress {
+  width: 100%;
+  height: 8px;
+  border: 1px solid #111;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+#export-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #111;
+  transition: width 0.08s linear;
+}
+
+#export-progress-text {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: #333;
+}
+
+#export-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ddd;
+  border-top-color: #111;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Debug overlay */

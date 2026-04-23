@@ -56,6 +56,81 @@
             />
           </label>
 
+          <div class="control" id="circle-color-controls">
+            <span>
+              circle color:
+              <strong id="circle-color-value">rgb(0, 0, 255)</strong>
+            </span>
+
+            <label class="control" for="circle-color-r">
+              <span>R</span>
+              <div class="color-channel-inputs">
+                <input
+                  id="circle-color-r"
+                  type="range"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value="0"
+                />
+                <input
+                  id="circle-color-r-number"
+                  type="number"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value="0"
+                />
+              </div>
+            </label>
+
+            <label class="control" for="circle-color-g">
+              <span>G</span>
+              <div class="color-channel-inputs">
+                <input
+                  id="circle-color-g"
+                  type="range"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value="0"
+                />
+                <input
+                  id="circle-color-g-number"
+                  type="number"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value="0"
+                />
+              </div>
+            </label>
+
+            <label class="control" for="circle-color-b">
+              <span>B</span>
+              <div class="color-channel-inputs">
+                <input
+                  id="circle-color-b"
+                  type="range"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value="255"
+                />
+                <input
+                  id="circle-color-b-number"
+                  type="number"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value="255"
+                />
+              </div>
+            </label>
+
+            <span id="circle-color-swatch" aria-hidden="true"></span>
+          </div>
+
           <label class="control" for="media-upload">
             <span>upload image/video</span>
             <input id="media-upload" type="file" accept="image/*,video/*" />
@@ -70,11 +145,9 @@
           </div>
 
           <div id="actions">
-            <button class="btn primary" id="btn-export" onclick="exportSVG()">
-              export svg
-            </button>
-            <button class="btn" id="btn-export-raw" onclick="exportSVGRaw()">
-              export svg raw
+            <button class="btn primary" id="btn-export">export svg</button>
+            <button class="btn" id="btn-export-raw">
+              export svg (rebuilt)
             </button>
           </div>
         </div>
@@ -91,20 +164,37 @@
             ></video>
 
             <span id="fps">FPS: —</span>
-            <canvas id="debug-canvas" width="320" height="240"></canvas>
+            <canvas id="debug-canvas"></canvas>
           </div>
 
-          <button class="btn" id="btn-debug" onclick="togglePreview()">
-            show source
-          </button>
+          <button class="btn" id="btn-debug">show source</button>
         </div>
       </aside>
 
       <div id="canvas-wrap">
         <canvas id="c"></canvas>
+        <div id="export-overlay" aria-live="polite" aria-hidden="true">
+          <div id="export-overlay-card">
+            <div id="export-spinner" aria-hidden="true"></div>
+            <strong id="export-overlay-title">exporting svg...</strong>
+            <span id="export-overlay-subtitle"
+              >this can take a while at high divisions</span
+            >
+            <div
+              id="export-progress"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div id="export-progress-fill"></div>
+            </div>
+            <span id="export-progress-text">0%</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <script src="sketch.js"></script>
+    <script type="module" src="sketch.js"></script>
   </body>
 </html>
