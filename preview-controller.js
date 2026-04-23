@@ -34,6 +34,7 @@ export function createPreviewController({
 
   function draw(sourceElement) {
     if (!visible) return;
+    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewCtx.drawImage(
       sourceElement,
       0,

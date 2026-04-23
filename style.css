@@ -20,14 +20,7 @@ body {
 }
 
 button,
-input,
-select,
-textarea {
-  font-family: inherit;
-}
-
-#app {
-  display: flex;
+  display: none;
   height: 100dvh;
 }
 
@@ -38,6 +31,9 @@ textarea {
   color: #222;
   padding: 16px 14px;
   display: flex;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
   flex-direction: column;
   justify-content: space-between;
   flex-shrink: 0;
@@ -275,14 +271,7 @@ textarea {
 }
 
 #vid {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  z-index: -1;
+  display: none;
 }
 
 #debug-canvas {
