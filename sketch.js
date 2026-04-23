@@ -215,12 +215,17 @@ syncCircleColor();
 circleRenderer.resizeScene();
 mediaController.init();
 
-paper.view.onFrame = () => {
+function renderFrame() {
+  requestAnimationFrame(renderFrame);
+
   if (exportInProgress) return;
   if (!mediaController.isActiveSourceReady()) return;
 
   const source = mediaController.getActiveSourceElement();
   circleRenderer.renderFromSource(source);
+  paper.view.update();
   preview.draw(source);
   fps.tick();
-};
+}
+
+requestAnimationFrame(renderFrame);
