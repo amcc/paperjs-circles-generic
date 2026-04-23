@@ -360,13 +360,29 @@ textarea {
 }
 
 @media (max-width: 900px) {
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
   #app {
     flex-direction: column;
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  #canvas-wrap {
+    order: -1;
+    min-height: 52dvh;
+    overflow: visible;
   }
 
   #sidebar {
     width: 100%;
     border-right: 0;
     border-bottom: 1px solid #d8d8d8;
+    min-height: auto;
   }
 }

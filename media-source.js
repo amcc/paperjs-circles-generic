@@ -20,6 +20,20 @@ export function createMediaSourceController({
   const svgBitmapCanvas = document.createElement("canvas");
   const svgBitmapCtx = svgBitmapCanvas.getContext("2d");
 
+  function syncCameraSource() {
+    if (!cameraVideoEl.videoWidth || !cameraVideoEl.videoHeight) return false;
+    if (sourceType !== "camera") return false;
+
+    notifySourceChange(
+      "camera",
+      cameraVideoEl,
+      `camera ${cameraVideoEl.videoWidth}x${cameraVideoEl.videoHeight}`,
+      getCameraAspectRatio(),
+    );
+
+    return true;
+  }
+
   function notifySourceChange(type, element, label, aspectRatio) {
     sourceType = type;
     activeSourceElement = element;
@@ -31,10 +45,6 @@ export function createMediaSourceController({
 
   function setCameraActive(active) {
     if (!cameraStream) return;
-
-    cameraStream.getVideoTracks().forEach((track) => {
-      track.enabled = active;
-    });
 
     if (active) {
       cameraVideoEl.play().catch(() => {});
@@ -81,18 +91,6 @@ export function createMediaSourceController({
         cameraVideoEl.srcObject = stream;
         setCameraActive(sourceType === "camera");
 
-        const syncCameraSource = () => {
-          if (!cameraVideoEl.videoWidth || !cameraVideoEl.videoHeight) return;
-          if (sourceType !== "camera") return;
-
-          notifySourceChange(
-            "camera",
-            cameraVideoEl,
-            `camera ${cameraVideoEl.videoWidth}x${cameraVideoEl.videoHeight}`,
-            getCameraAspectRatio(),
-          );
-        };
-
         cameraVideoEl.onloadedmetadata = () => {
           cameraVideoEl.play().catch(() => {});
           notifySourceChange(
@@ -101,8 +99,12 @@ export function createMediaSourceController({
             "camera",
             getCameraAspectRatio(),
           );
-          requestAnimationFrame(syncCameraSource);
-          requestAnimationFrame(syncCameraSource);
+          requestAnimationFrame(() => {
+            syncCameraSource();
+          });
+          requestAnimationFrame(() => {
+            syncCameraSource();
+          });
         };
 
         cameraVideoEl.oncanplay = () => {
@@ -127,9 +129,14 @@ export function createMediaSourceController({
       uploadObjectUrl = "";
     }
 
+    uploadVideo.onloadedmetadata = null;
+    uploadVideo.onerror = null;
     uploadVideo.pause();
     uploadVideo.removeAttribute("src");
     uploadVideo.load();
+
+    uploadImage.onload = null;
+    uploadImage.onerror = null;
     uploadImage.src = "";
   }
 
@@ -142,16 +149,20 @@ export function createMediaSourceController({
     cleanupUploadMedia();
     uploadInputEl.value = "";
     setCameraActive(true);
+    cameraVideoEl.play().catch(() => {});
 
-    const width = cameraVideoEl.videoWidth || 4;
-    const height = cameraVideoEl.videoHeight || 3;
+    if (syncCameraSource()) {
+      return;
+    }
 
-    notifySourceChange(
-      "camera",
-      cameraVideoEl,
-      `camera ${width}x${height}`,
-      getCameraAspectRatio(),
-    );
+    requestAnimationFrame(() => {
+      syncCameraSource();
+    });
+    requestAnimationFrame(() => {
+      syncCameraSource();
+    });
+
+    notifySourceChange("camera", cameraVideoEl, "camera", getCameraAspectRatio());
   }
 
   function handleMediaUpload(event) {
